@@ -1,0 +1,245 @@
+---
+title: "P8130_project"
+author: "Jeffrey Liang"
+date: "12/6/2020"
+output: pdf_document
+---
+
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(readxl)
+library(patchwork)
+library(arsenal)
+knitr::opts_chunk$set(
+  fig.height = 6,
+  fig.width = 8,
+  message = F,
+  echo = F,
+  warning = F
+)
+theme_set(theme_minimal() + theme(legend.position = "bottom"))
+options(
+  ggplot2.continuous.colour = "viridis",
+  ggplot2.continuous.fill = "viridis",
+  digits = 3
+)
+scale_colour_discrete = scale_colour_viridis_d
+scale_fill_discrete = scale_fill_viridis_d
+
+my_controls <- tableby.control(
+  total = F,
+  test = F,
+  # No test p-values yet
+  numeric.stats = c("meansd", "medianq1q3", "range"),
+  cat.stats = c("countpct"),
+  stats.labels = list(
+    meansd = "Mean (SD)",
+    medianq1q3 = "Median (Q1, Q3)",
+    range = "Min - Max",
+    Nmiss2 = "Missing",
+    countpct = "N (%)"
+  )
+)
+```
+
+
+```{r load_data}
+hate_df =
+  read_csv(here::here("HateCrimes.csv"),
+           col_types =
+             "cffdddddd") %>%
+  janitor::clean_names()
+
+hate_df %>%
+  select(-state) %>%
+  tableby( ~ ., data = ., control = my_controls) %>%
+  summary(., title = "Descriptive Statistics") %>%
+  knitr::kable()
+
+ggplot(aes(x=hate_crimes_per_100k_splc %>% as.numeric() %>% log()),
+       data = hate_df)+ geom_density()
+
+hate_df %>% 
+  mutate(state  = forcats::fct_reorder(state,hate_crimes_per_100k_splc)) %>% 
+  ggplot(aes(x = state, y = hate_crimes_per_100k_splc)) +
+  geom_point() +
+  theme(axis.text.x = element_text(angle = 90) )
+
+hate_df %>% 
+  mutate(state  = forcats::fct_reorder(state,median_household_income)) %>% 
+  ggplot(aes(x = state, y = median_household_income)) +
+  geom_point() +
+  theme(axis.text.x = element_text(angle = 90) )
+```
+
+```{r}
+plot(
+  lm(hate_crimes_per_100k_splc~state,data=hate_df),
+  which = 1
+)
+```
+
+
+```{r cor}
+hate_df %>% 
+  mutate(hate_crimes_per_100k_splc = log(hate_crimes_per_100k_splc+1)) %>% 
+  select(where(is.numeric)) %>% 
+  drop_na() %>% 
+  cor() %>% 
+  corrplot::corrplot(
+    method = "circle",
+    type = "lower",
+    addCoef.col = "black",
+    diag = T
+  )
+
+hate_df %>% 
+  filter(hate_crimes_per_100k_splc<=1.2) %>% 
+  mutate(hate_crimes_per_100k_splc = log(hate_crimes_per_100k_splc+1)) %>% 
+  select(where(is.numeric)) %>% 
+  drop_na() %>% 
+  cor() %>% 
+  corrplot::corrplot(
+    method = "circle",
+    type = "lower",
+    addCoef.col = "black",
+    diag = T
+  )
+```
+
+
+```{r}
+hate_md =
+  lm(log(hate_crimes_per_100k_splc) ~ ., data =   hate_df %>%
+       select(-state) %>% drop_na())
+
+car::vif(hate_md)
+
+hate_step_md =
+  step(hate_md,direction = "both",
+       trace = 0)
+
+summary(hate_step_md)
+
+car::vif(hate_step_md)
+
+
+hate_md =
+  lm(log(hate_crimes_per_100k_splc) ~ ., data =   hate_df %>%
+       select(-state) %>% drop_na() %>% filter(hate_crimes_per_100k_splc<1.2))
+
+hate_step_md1 =
+  step(hate_md,direction = "backward")
+
+
+
+summary(hate_step_md1)
+
+car::vif(hate_step_md1)
+
+anova(
+  lm(
+    log(hate_crimes_per_100k_splc) ~ perc_population_with_high_school_degree,
+    data =   hate_df %>%
+      select(-state) %>%
+      drop_na() %>%
+      filter(hate_crimes_per_100k_splc < 1.2)
+  ),  hate_step_md1
+)
+```
+
+```{r}
+hate_step_md1_fll =
+  lm(hate_step_md1$terms,data = hate_df %>% filter(hate_crimes_per_100k_splc < 1.2))
+
+summary(hate_step_md1_fll)
+
+num = anova(hate_step_md1_fll) %>%
+  broom::tidy() %>% 
+  filter(term == "gini_index") %>% 
+  pull(sumsq)
+
+den = 
+  lm(log(hate_crimes_per_100k_splc) ~ perc_population_with_high_school_degree,
+     data = hate_df %>%
+       filter(hate_crimes_per_100k_splc < 1.2)) %>% 
+  anova() %>% 
+  broom::tidy() %>% 
+  filter(term == "Residuals") %>% 
+  pull(sumsq)
+
+r_partial = num/den
+```
+
+
+```{r}
+hate_md_fll =
+  lm(log(hate_crimes_per_100k_splc) ~ .-state,
+     data = hate_df %>% filter(hate_crimes_per_100k_splc < 1.2))
+
+summary(hate_md_fll)
+
+num = anova(hate_md_fll) %>%
+  broom::tidy() %>% 
+  filter(term == "gini_index") %>% 
+  pull(sumsq)
+
+den = 
+  lm(log(hate_crimes_per_100k_splc) ~ .-gini_index-state,
+     data = hate_df %>%
+       filter(hate_crimes_per_100k_splc < 1.2)) %>% 
+  anova() %>% 
+  broom::tidy() %>% 
+  filter(term == "Residuals") %>% 
+  pull(sumsq)
+
+r_partial = num/den
+```
+
+
+
+```{r}
+hate_int_md =
+  lm(log(hate_crimes_per_100k_splc) ~ .*unemployment, 
+     data =   hate_df %>%
+       select(-state) %>% 
+       drop_na() %>% 
+       filter(hate_crimes_per_100k_splc < 1.2))
+
+summary(hate_int_md)
+
+car::vif(hate_int_md)
+
+hate_int_step_md1 =
+  step(
+    hate_int_md,
+    scope = list(lower = . ~ 1, upper = . ~ .),
+    direction = "backward",
+    trace = 0
+  )
+
+summary(hate_int_step_md1)
+
+car::vif(hate_int_step_md1)
+
+num = anova(hate_int_step_md1) %>%
+  broom::tidy() %>% 
+  filter(term == "gini_index") %>% 
+  pull(sumsq)
+
+den =
+  lm(
+    log(hate_crimes_per_100k_splc) ~ unemployment + 
+    perc_population_with_high_school_degree + gini_index + unemployment:gini_index,
+    data = hate_df %>%
+      filter(hate_crimes_per_100k_splc < 1.2)
+  ) %>%
+  anova() %>%
+  broom::tidy() %>%
+  filter(term == "Residuals") %>%
+  pull(sumsq)
+
+r_partial = num / den
+```
+
