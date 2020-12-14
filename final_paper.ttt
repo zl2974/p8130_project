@@ -1,0 +1,95 @@
+\begin{longtable}[t]{l|l}
+\caption{\label{tab:descriptive}caption}\\
+\hline
+ & Overall (N=44)\\
+\hline
+unemployment & \\
+\hline
+-  high & 22 (50.0\%)\\
+\hline
+-  low & 22 (50.0\%)\\
+\hline
+urbanization & \\
+\hline
+-  low & 21 (47.7\%)\\
+\hline
+-  high & 23 (52.3\%)\\
+\hline
+median\_household\_income & \\
+\hline
+-  Mean (SD) & 55004.545 (8860.066)\\
+\hline
+-  Median (Q1, Q3) & 54613.000 (47844.750, 60542.250)\\
+\hline
+-  Min - Max & 39552.000 - 76165.000\\
+\hline
+perc\_population\_with\_high\_school\_degree & \\
+\hline
+-  Mean (SD) & 0.867 (0.033)\\
+\hline
+-  Median (Q1, Q3) & 0.871 (0.839, 0.894)\\
+\hline
+-  Min - Max & 0.799 - 0.915\\
+\hline
+perc\_non\_citizen & \\
+\hline
+-  Mean (SD) & 0.054 (0.030)\\
+\hline
+-  Median (Q1, Q3) & 0.045 (0.030, 0.080)\\
+\hline
+-  Min - Max & 0.010 - 0.130\\
+\hline
+gini\_index & \\
+\hline
+-  Mean (SD) & 0.454 (0.018)\\
+\hline
+-  Median (Q1, Q3) & 0.455 (0.441, 0.466)\\
+\hline
+-  Min - Max & 0.419 - 0.499\\
+\hline
+perc\_non\_white & \\
+\hline
+-  Mean (SD) & 0.310 (0.142)\\
+\hline
+-  Median (Q1, Q3) & 0.290 (0.208, 0.420)\\
+\hline
+-  Min - Max & 0.060 - 0.620\\
+\hline
+hate\_crimes\_per\_100k\_splc & \\
+\hline
+-  Mean (SD) & 0.275 (0.171)\\
+\hline
+-  Median (Q1, Q3) & 0.226 (0.143, 0.339)\\
+\hline
+-  Min - Max & 0.069 - 0.833\\
+\hline
+\end{longtable}
+\efloatseparator
+ 
+\begin{lltable}
+
+\begin{TableNotes}[para]
+\normalsize{\textit{Note.} some note}
+\end{TableNotes}
+
+\begin{longtable}{llll}\noalign{\getlongtablewidth\global\LTcapwidth=\longtablewidth}
+\caption{\label{tab:model}Association table}\\
+\toprule
+term & \multicolumn{1}{c}{model\_1} & \multicolumn{1}{c}{model\_2} & \multicolumn{1}{c}{model\_3}\\
+\midrule
+\endfirsthead
+\caption*{\normalfont{Table \ref{tab:model} continued}}\\
+\toprule
+term & \multicolumn{1}{c}{model\_1} & \multicolumn{1}{c}{model\_2} & \multicolumn{1}{c}{model\_3}\\
+\midrule
+\endhead
+gini\_index & -0.999 ( -11.478 , 9.481 ) & 10.811 ( -2.146 , 23.767 ) & -0.279 ( -19.392 , 18.833 )\\
+perc\_population\_with\_high\_school\_degree & NA & 9.509 ( 2.619 , 16.4 ) & 8.427 ( 1.426 , 15.428 )\\
+unemploymentlow & NA & NA & -8.235 ( -18.176 , 1.706 )\\
+gini\_index:unemploymentlow & NA & NA & 18.526 ( -3.248 , 40.3 )\\
+\bottomrule
+\addlinespace
+\insertTableNotes
+\end{longtable}
+
+\end{lltable}

@@ -64,6 +64,9 @@ output            : papaja::apa6_pdf
 ---
 
 ```{r setup, include = FALSE}
+if(!"papaja" %in% rownames(installed.packages())) {
+  devtools::install_github("crsh/papaja")
+}
 library("papaja")
 r_refs("r-references.bib")
 library(tidyverse)
@@ -131,17 +134,18 @@ We used `r cite_r("r-references.bib")` for all our analyses.
 
 # Results
 
-```{r descriptive}
+```{r descriptive, results = "asis"}
 hate_df %>%
   select(-state) %>%
   tableby( ~ ., data = ., control = my_controls) %>%
-  summary(., title = "Descriptive Statistics") %>%
+  summary(., title = "Descriptive Statistics",text = TRUE) %>%
   knitr::kable(
+    longtable = T,
     caption = "caption"
   )
 ```
 
-```{r model}
+```{r model,results = "asis"}
 hate_md =
   hate_df %>%
   nest(.) %>%
@@ -179,11 +183,28 @@ hate_md =
   ) %>% 
   mutate(value = map(value,broom::tidy)) %>% 
   unnest(c(value)) %>% 
-  janitor::clean_names() %>% 
-  mutate(across(where(is.numeric),~as.character(round(.x,3)))) %>% 
-  unite("estimate",
-    c(estimate,p_value),
-        sep = "(")
+  janitor::clean_names() %>%
+  filter(term != "(Intercept)")
+
+hate_md %>% 
+  mutate(
+    lwr = estimate - qt(0.975, 44) * std_error,
+    upr = estimate + qt(0.975, 44) * std_error,
+    across(where(is.numeric),  ~ as.character(round(.x, 3))),
+    result =
+      str_c(estimate,"(",lwr,",",upr,")",sep = " ")
+  ) %>% 
+  select(model,term,result) %>% 
+  pivot_wider(
+    names_from = model,
+    values_from = result
+  ) %>% 
+  apa_table(
+    .,
+    caption = "Association table",
+    note = "some note",
+    landscape = TRUE
+  )
 ```
 
 
