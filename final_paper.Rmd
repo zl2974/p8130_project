@@ -243,7 +243,7 @@ hate_md %>%
 
 # Appendix
 
-```{r correlation}
+```{r correlation，fig.cap = "Correlation Plot"}
 hate_df %>% 
   select(where(is.numeric)) %>% 
   cor() %>% 
@@ -252,8 +252,14 @@ hate_df %>%
     type = "lower",
     addCoef.col = "black",
     diag = T,
-    title = "Correlation Plot",
     tl.srt = 1
   )
 ```
+
+```{r log-transformation,fig.cap = "Box-Cox transformation"}
+lm(hate_crimes ~ . - state,
+     data = hate_df) %>% 
+  car::boxCox()
+```
+
 

@@ -193,6 +193,9 @@ We used R (Version 4.0.3; R Core Team, 2020) and the R-packages \emph{arsenal} (
 \hypertarget{results}{%
 \section{Results}\label{results}}
 
+\hypertarget{data-description}{%
+\subsection{Data Description}\label{data-description}}
+
 \begin{longtable}[t]{l|l}
 \caption{\label{tab:descriptive}caption}\\
 \hline
@@ -260,6 +263,18 @@ hate\_crimes & \\
 \hline
 \end{longtable}
 
+\hypertarget{data-transformation}{%
+\subsection{Data transformation}\label{data-transformation}}
+
+\hypertarget{modeling}{%
+\subsection{Modeling}\label{modeling}}
+
+\hypertarget{association}{%
+\subsubsection{Association}\label{association}}
+
+\hypertarget{adjusting-confounders}{%
+\subsubsection{Adjusting Confounders}\label{adjusting-confounders}}
+
 \begin{lltable}
 
 \begin{TableNotes}[para]
@@ -290,6 +305,20 @@ gini\_index:unemploymentlow & NA & NA & 18.526 ( -3.248 , 40.3 )\\
 
 \hypertarget{discussion}{%
 \section{Discussion}\label{discussion}}
+
+\hypertarget{gini-is-not-a-main-predictor-of-hate-crime}{%
+\subsection{Gini is not a main predictor of Hate crime}\label{gini-is-not-a-main-predictor-of-hate-crime}}
+
+\hypertarget{why-income-elimiated}{%
+\subsection{Why income elimiated}\label{why-income-elimiated}}
+
+(Collinear)
+
+\hypertarget{limitation}{%
+\subsection{Limitation}\label{limitation}}
+
+\hypertarget{sample-size}{%
+\subsubsection{Sample size}\label{sample-size}}
 
 \newpage
 
@@ -348,7 +377,17 @@ Wickham, H., Hester, J., \& Francois, R. (2018). \emph{Readr: Read rectangular t
 \hypertarget{appendix}{%
 \section{Appendix}\label{appendix}}
 
+\begin{figure}
+\centering
 \includegraphics{final_paper_files/figure-latex/correlation-1.pdf}
+\caption{\label{fig:correlation}Correlation Plot}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics{final_paper_files/figure-latex/log-transformation-1.pdf}
+\caption{\label{fig:log-transformation}Box-Cox transformation}
+\end{figure}
 
 
 \end{document}

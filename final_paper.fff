@@ -1,0 +1,14 @@
+\begin{figure*}[hbt]
+\ifnextchar[{\eatarg}{}
+
+\centering
+\includegraphics{final_paper_files/figure-latex/correlation-1.pdf}
+\caption{\label{fig:correlation}Correlation Plot}
+\end{figure*}
+\begin{figure*}[hbt]
+\ifnextchar[{\eatarg}{}
+
+\centering
+\includegraphics{final_paper_files/figure-latex/log-transformation-1.pdf}
+\caption{\label{fig:log-transformation}Box-Cox transformation}
+\end{figure*}
