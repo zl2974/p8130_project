@@ -138,6 +138,7 @@ We used `r cite_r("r-references.bib")` for all our analyses.
 
 # Results
 
+## Data Description
 ```{r descriptive, results = "asis"}
 hate_df %>%
   select(-state) %>%
@@ -148,6 +149,14 @@ hate_df %>%
     caption = "caption"
   )
 ```
+
+## Data transformation
+
+## Modeling
+
+### Association
+
+### Adjusting Confounders
 
 ```{r model,results = "asis"}
 hate_md =
@@ -179,12 +188,10 @@ hate_md =
                data = .x
              )
            )) %>% 
-  select(-data) %>% 
-  pivot_longer(
-    model_1:model_3,
-    names_to = "model",
-    values_to = "value"
-  ) %>% 
+  select(-data) %>%
+  pivot_longer(model_1:model_3,
+               names_to = "model",
+               values_to = "value") %>% 
   mutate(value = map(value,broom::tidy)) %>% 
   unnest(c(value)) %>% 
   janitor::clean_names() %>%
@@ -199,20 +206,28 @@ hate_md %>%
       str_c(estimate,"(",lwr,",",upr,")",sep = " ")
   ) %>% 
   select(model,term,result) %>% 
-  pivot_wider(
-    names_from = model,
-    values_from = result
-  ) %>% 
-  apa_table(
-    .,
-    caption = "Association table",
-    note = "some note",
-    landscape = TRUE
-  )
+  pivot_wider(names_from = model,
+              values_from = result) %>% 
+  apa_table(.,
+            caption = "Association table",
+            note = "some note",
+            landscape = TRUE)
 ```
 
 
 # Discussion
+
+## Gini is not a main predictor of Hate crime
+
+
+## Why income elimiated
+(Collinear)
+
+
+## Limitation
+
+
+### Sample size
 
 
 \newpage
@@ -238,8 +253,7 @@ hate_df %>%
     addCoef.col = "black",
     diag = T,
     title = "Correlation Plot",
-    tl.srt = 0
+    tl.srt = 1
   )
-
 ```
 
