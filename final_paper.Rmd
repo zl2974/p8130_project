@@ -54,7 +54,7 @@ floatsintext      : no
 figurelist        : no
 tablelist         : no
 footnotelist      : no
-linenumbers       : no
+linenumbers       : yes
 mask              : no
 draft             : no
 
@@ -112,9 +112,13 @@ hate_df =
              "cffdddddd") %>%
   janitor::clean_names() %>%
   drop_na() %>%
-  filter(hate_crimes_per_100k_splc < 1.2) %>% 
-  mutate(across(unemployment:urbanization,as.factor),
-         )
+  filter(hate_crimes_per_100k_splc < 1.2) %>%
+  mutate(across(unemployment:urbanization, as.factor)) %>% 
+  rename(
+    education = perc_population_with_high_school_degree,
+    hate_crimes = hate_crimes_per_100k_splc,
+    median_income = median_household_income
+  )
 ```
 
 
@@ -152,15 +156,15 @@ hate_md =
   mutate(model_1 =
            map(.x = data,
                ~ lm(
-                 log(hate_crimes_per_100k_splc) ~ gini_index,
+                 log(hate_crimes) ~ gini_index,
                  data = .x
                )),
          model_2 =
            map(
              .x = data,
              ~ lm(
-               log(hate_crimes_per_100k_splc) ~ 
-                 gini_index + perc_population_with_high_school_degree,
+               log(hate_crimes) ~ 
+                 gini_index + education,
                data = .x
              )
            ),
@@ -168,9 +172,9 @@ hate_md =
            map(
              .x = data,
              ~ lm(
-               log(hate_crimes_per_100k_splc) ~
+               log(hate_crimes) ~
                  gini_index +
-                 perc_population_with_high_school_degree +
+                 education +
                  unemployment + unemployment:gini_index,
                data = .x
              )
@@ -233,7 +237,8 @@ hate_df %>%
     type = "lower",
     addCoef.col = "black",
     diag = T,
-    title = "Correlation Plot"
+    title = "Correlation Plot",
+    tl.srt = 0
   )
 
 ```

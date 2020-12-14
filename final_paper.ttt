@@ -15,7 +15,7 @@ urbanization & \\
 \hline
 -  high & 23 (52.3\%)\\
 \hline
-median\_household\_income & \\
+median\_income & \\
 \hline
 -  Mean (SD) & 55004.545 (8860.066)\\
 \hline
@@ -23,7 +23,7 @@ median\_household\_income & \\
 \hline
 -  Min - Max & 39552.000 - 76165.000\\
 \hline
-perc\_population\_with\_high\_school\_degree & \\
+education & \\
 \hline
 -  Mean (SD) & 0.867 (0.033)\\
 \hline
@@ -55,7 +55,7 @@ perc\_non\_white & \\
 \hline
 -  Min - Max & 0.060 - 0.620\\
 \hline
-hate\_crimes\_per\_100k\_splc & \\
+hate\_crimes & \\
 \hline
 -  Mean (SD) & 0.275 (0.171)\\
 \hline
@@ -84,7 +84,7 @@ term & \multicolumn{1}{c}{model\_1} & \multicolumn{1}{c}{model\_2} & \multicolum
 \midrule
 \endhead
 gini\_index & -0.999 ( -11.478 , 9.481 ) & 10.811 ( -2.146 , 23.767 ) & -0.279 ( -19.392 , 18.833 )\\
-perc\_population\_with\_high\_school\_degree & NA & 9.509 ( 2.619 , 16.4 ) & 8.427 ( 1.426 , 15.428 )\\
+education & NA & 9.509 ( 2.619 , 16.4 ) & 8.427 ( 1.426 , 15.428 )\\
 unemploymentlow & NA & NA & -8.235 ( -18.176 , 1.706 )\\
 gini\_index:unemploymentlow & NA & NA & 18.526 ( -3.248 , 40.3 )\\
 \bottomrule
