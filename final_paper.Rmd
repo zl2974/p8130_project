@@ -110,7 +110,8 @@ hate_df =
   janitor::clean_names() %>%
   drop_na() %>%
   filter(hate_crimes_per_100k_splc < 1.2) %>% 
-  mutate(across(unemployment:urbanization,as.factor))
+  mutate(across(unemployment:urbanization,as.factor),
+         )
 ```
 
 
@@ -140,8 +141,49 @@ hate_df %>%
   )
 ```
 
-```{r }
-
+```{r model}
+hate_md =
+  hate_df %>%
+  nest(.) %>%
+  mutate(model_1 =
+           map(.x = data,
+               ~ lm(
+                 log(hate_crimes_per_100k_splc) ~ gini_index,
+                 data = .x
+               )),
+         model_2 =
+           map(
+             .x = data,
+             ~ lm(
+               log(hate_crimes_per_100k_splc) ~ 
+                 gini_index + perc_population_with_high_school_degree,
+               data = .x
+             )
+           ),
+         model_3 =
+           map(
+             .x = data,
+             ~ lm(
+               log(hate_crimes_per_100k_splc) ~
+                 gini_index +
+                 perc_population_with_high_school_degree +
+                 unemployment + unemployment:gini_index,
+               data = .x
+             )
+           )) %>% 
+  select(-data) %>% 
+  pivot_longer(
+    model_1:model_3,
+    names_to = "model",
+    values_to = "value"
+  ) %>% 
+  mutate(value = map(value,broom::tidy)) %>% 
+  unnest(c(value)) %>% 
+  janitor::clean_names() %>% 
+  mutate(across(where(is.numeric),~as.character(round(.x,3)))) %>% 
+  unite("estimate",
+    c(estimate,p_value),
+        sep = "(")
 ```
 
 
