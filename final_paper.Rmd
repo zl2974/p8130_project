@@ -54,7 +54,7 @@ floatsintext      : no
 figurelist        : no
 tablelist         : no
 footnotelist      : no
-linenumbers       : yes
+linenumbers       : no
 mask              : no
 draft             : no
 
@@ -109,7 +109,8 @@ hate_df =
              "cffdddddd") %>%
   janitor::clean_names() %>%
   drop_na() %>%
-  filter(hate_crimes_per_100k_splc < 1.2)
+  filter(hate_crimes_per_100k_splc < 1.2) %>% 
+  mutate(across(unemployment:urbanization,as.factor))
 ```
 
 
@@ -139,6 +140,10 @@ hate_df %>%
   )
 ```
 
+```{r }
+
+```
+
 
 # Discussion
 
@@ -153,3 +158,20 @@ hate_df %>%
 
 <div id="refs" custom-style="Bibliography"></div>
 \endgroup
+
+# Appendix
+
+```{r correlation}
+hate_df %>% 
+  select(where(is.numeric)) %>% 
+  cor() %>% 
+  corrplot::corrplot(
+    method = "circle",
+    type = "lower",
+    addCoef.col = "black",
+    diag = T,
+    title = "Correlation Plot"
+  )
+
+```
+
