@@ -113,12 +113,7 @@ hate_df =
   janitor::clean_names() %>%
   drop_na() %>%
   filter(hate_crimes_per_100k_splc < 1.2) %>%
-  mutate(across(unemployment:urbanization, as.factor)) %>% 
-  rename(
-    education = perc_population_with_high_school_degree,
-    hate_crimes = hate_crimes_per_100k_splc,
-    median_income = median_household_income
-  )
+  mutate(across(unemployment:urbanization, as.factor))
 ```
 
 
@@ -146,7 +141,7 @@ hate_df %>%
   summary(., title = "Descriptive Statistics",text = TRUE) %>%
   knitr::kable(
     longtable = T,
-    caption = "caption"
+    caption = "             Summary Statistics, 2016"
   )
 ```
 
@@ -157,47 +152,109 @@ hate_df %>%
 ### Association
 
 ### Adjusting Confounders
+```{r}
+hate_slr =
+  hate_df %>%
+  mutate(across(where(is.numeric),scale)) %>% 
+  nest(.) %>%
+  mutate(unemployment =
+           map(.x = data,
+               ~ lm(log(hate_crimes_per_100k_splc) ~ unemployment,
+                    data = .x)),
+         urbanization =
+           map(.x = data,
+               ~ lm(log(hate_crimes_per_100k_splc) ~ urbanization,
+                    data = .x)),
+         median_household_income =
+           map(.x = data,
+               ~ lm(log(hate_crimes_per_100k_splc) ~ median_household_income,
+                    data = .x)),
+         perc_population_with_high_school_degree =
+           map(.x = data,
+               ~ lm(log(hate_crimes_per_100k_splc) ~
+                      perc_population_with_high_school_degree,
+                    data = .x)),
+         perc_non_citizen =
+           map(.x = data,
+               ~ lm(log(hate_crimes_per_100k_splc) ~ perc_non_citizen,
+                    data = .x)), 
+         gini_index =
+           map(.x = data,
+               ~ lm(log(hate_crimes_per_100k_splc) ~ gini_index,
+                    data = .x)),
+         perc_non_white =
+           map(.x = data,
+               ~ lm(log(hate_crimes_per_100k_splc) ~ perc_non_white,
+                    data = .x)),
+         ) %>% 
+  select(-data) %>% 
+  pivot_longer(everything(),
+               names_to = "model",
+               values_to = "value") %>% 
+  mutate(value = map(value, broom::tidy)) %>% 
+  unnest(c(value)) %>% 
+  janitor::clean_names() %>%
+  filter(term != "(Intercept)") %>% 
+  select(-term) %>% 
+  mutate(
+    lwr = estimate - qt(0.975, 44) * std_error,
+    upr = estimate + qt(0.975, 44) * std_error,
+    across(where(is.numeric),  ~ as.character(round(.x, 3))),
+    result =
+      str_c(estimate,"(",lwr,",",upr,")",sep = " ")
+  ) %>% 
+  select(model,result) %>% 
+  apa_table(.,
+            landscape = TRUE)
+
+hate_slr
+```
+
+
 
 ```{r model,results = "asis"}
 hate_md =
   hate_df %>%
+  mutate(across(where(is.numeric),scale)) %>% 
   nest(.) %>%
   mutate(model_1 =
            map(.x = data,
+               ~ lm(log(hate_crimes_per_100k_splc) ~ perc_population_with_high_school_degree,
+                    data = .x)),
+         model_2 =
+           map(.x = data,
                ~ lm(
-                 log(hate_crimes) ~ gini_index,
+                 log(hate_crimes_per_100k_splc) ~
+                   perc_population_with_high_school_degree + . - state,
                  data = .x
                )),
-         model_2 =
-           map(
-             .x = data,
-             ~ lm(
-               log(hate_crimes) ~ 
-                 gini_index + education,
-               data = .x
-             )
-           ),
          model_3 =
-           map(
-             .x = data,
-             ~ lm(
-               log(hate_crimes) ~
-                 gini_index +
-                 education +
-                 unemployment + unemployment:gini_index,
-               data = .x
-             )
-           )) %>% 
-  select(-data) %>%
+           map(.x = data,
+               ~ lm(log(hate_crimes_per_100k_splc) ~
+                      perc_population_with_high_school_degree+gini_index,
+                    data = .x)),
+         model_4 =
+           map(.x = data,
+               ~ lm(log(hate_crimes_per_100k_splc) ~
+                      perc_population_with_high_school_degree * unemployment +
+                      gini_index, 
+                    data = .x)),
+         model_5 =
+           map(.x = data,
+               ~ lm(log(hate_crimes_per_100k_splc) ~
+                      perc_population_with_high_school_degree * urbanization +
+                      gini_index,
+                    data = .x))) %>% 
+  select(-data)
+
+hate_md %>% 
   pivot_longer(model_1:model_3,
                names_to = "model",
                values_to = "value") %>% 
   mutate(value = map(value,broom::tidy)) %>% 
   unnest(c(value)) %>% 
   janitor::clean_names() %>%
-  filter(term != "(Intercept)")
-
-hate_md %>% 
+  filter(term != "(Intercept)") %>% 
   mutate(
     lwr = estimate - qt(0.975, 44) * std_error,
     upr = estimate + qt(0.975, 44) * std_error,
@@ -210,6 +267,29 @@ hate_md %>%
               values_from = result) %>% 
   apa_table(.,
             caption = "Association table",
+            note = "some note",
+            landscape = TRUE)
+  
+hate_md %>% 
+  pivot_longer(model_3:model_5,
+               names_to = "model",
+               values_to = "value") %>% 
+  mutate(value = map(value,broom::tidy)) %>% 
+  unnest(c(value)) %>% 
+  janitor::clean_names() %>%
+  filter(term != "(Intercept)") %>% 
+  mutate(
+    lwr = estimate - qt(0.975, 44) * std_error,
+    upr = estimate + qt(0.975, 44) * std_error,
+    across(where(is.numeric),  ~ as.character(round(.x, 3))),
+    result =
+      str_c(estimate,"(",lwr,",",upr,")",sep = " ")
+  ) %>% 
+  select(model,term,result) %>% 
+  pivot_wider(names_from = model,
+              values_from = result) %>% 
+  apa_table(.,
+            caption = "Model Selection",
             note = "some note",
             landscape = TRUE)
 ```
@@ -257,7 +337,7 @@ hate_df %>%
 ```
 
 ```{r log-transformation,fig.cap = "Box-Cox transformation"}
-lm(hate_crimes ~ . - state,
+lm(hate_crimes_per_100k_splc ~ . - state,
      data = hate_df) %>% 
   car::boxCox()
 ```
